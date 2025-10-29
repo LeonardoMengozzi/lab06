@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,9 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *
      * think of what type of keys and values would best suit the requirements
      */
+    private final static Object NO_GRUOP = null;
 
+    private Map<String, Set<U>> groupAndFollowers;
     /*
      * [CONSTRUCTORS]
      *
@@ -64,12 +67,16 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *            application
      */
     public SocialNetworkUserImpl(final String name, final String surname, final String user, final int userAge) {
-        super(null, null, null, 0);
+        super(name, surname, user, userAge);
+        groupAndFollowers = new HashMap<String, Set<U>>();
     }
 
     /*
      * 2) Define a further constructor where the age defaults to -1
      */
+    public SocialNetworkUserImpl(final String name, final String surname, final String user) {
+        this(name, surname, user, -1);
+    }
 
     /*
      * [METHODS]
@@ -78,7 +85,12 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public boolean addFollowedUser(final String circle, final U user) {
-        return false;
+        final var usersGroup = searchGroup(circle);
+        if (usersGroup.contains(user)) {
+            return false;
+        }
+        usersGroup.add(user);
+        return true;
     }
 
     /**
@@ -88,11 +100,24 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public Collection<U> getFollowedUsersInGroup(final String groupName) {
-        return null;
+        return new HashSet<>(searchGroup(groupName));
     }
 
     @Override
     public List<U> getFollowedUsers() {
-        return null;
+        List<U> allFollowers = new LinkedList<>();
+        for(var groupFollowers: groupAndFollowers.values()) {
+            allFollowers.addAll(groupFollowers);
+        }
+        return allFollowers;
+    }
+
+    private  Collection<U> searchGroup(final String groupName) {
+        var usersGroup = this.groupAndFollowers.get(groupName);
+        if (usersGroup == NO_GRUOP) {
+            usersGroup = new HashSet<U>();
+            groupAndFollowers.put(groupName, usersGroup);
+        }
+        return usersGroup;
     }
 }
