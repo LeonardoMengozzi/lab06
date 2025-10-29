@@ -12,33 +12,34 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public final class UseListsAndMaps {
+    private static final int MIN = 1000;
+    private static final int MAX = 2000;
     private static final int ELEMS = 100_000;
     private static final int ELEMS_TO_READ = 1_000;
 
     private UseListsAndMaps() {
     }
 
-    private static void printTime(final long time) {
+    private static String formatTime(final long time) {
         final var millis = TimeUnit.NANOSECONDS.toMillis(time);
-        System.out.println(time + "ns (" + millis + "ms)");
+        return time + "ns (" + millis + "ms)";
     }
 
-    private static void calcInserctionTime(final List<Integer> li) {
-        long time = System.nanoTime();
-        for (int i = 0; i < ELEMS; i++) {
-            li.addFirst(i);
+    private static long timeHeadInserction(final List<Integer> lst, final int elem) {
+        final long time = System.nanoTime();
+        for (int i = 0; i < elem; i++) {
+            lst.addFirst(i);
         }
-        time = System.nanoTime() - time;
-        printTime(time);
+        return System.nanoTime() - time;
     }
 
-    private static void calcReadingTime(final List<Integer> li, final int posStartReading) {
-        long time = System.nanoTime();
-        for (int i = posStartReading; i < ELEMS_TO_READ; i++) {
-            li.get(i);
+    private static long timeReadingByMiddle(final List<Integer> lst, final int elem) {
+        final int idxStart = lst.size() / 2;
+        final long time = System.nanoTime();
+        for (int i = 0; i < elem; i++) {
+            lst.get(idxStart + i);
         }
-        time = System.nanoTime() - time;
-        printTime(time);
+        return System.nanoTime() - time;
     }
 
     /**
@@ -50,31 +51,29 @@ public final class UseListsAndMaps {
          * 1) Create a new ArrayList<Integer>, and populate it with the numbers
          * from 1000 (included) to 2000 (excluded).
          */
-        final int min = 1000;
-        final int max = 2000;
-        List<Integer> li = new ArrayList<>();
-        for (int i = min; i < max; i++) {
-            li.add(i);
+        List<Integer> arrLst = new ArrayList<>();
+        for (int i = MIN; i < MAX; i++) {
+            arrLst.add(i);
         }
         /*
          * 2) Create a new LinkedList<Integer> and, in a single line of code
          * without using any looping construct (for, while), populate it with
          * the same contents of the list of point 1.
          */
-        List<Integer> li2 = new LinkedList<>(li);
+        List<Integer> lnkLst = new LinkedList<>(arrLst);
         /*
          * 3) Using "set" and "get" and "size" methods, swap the first and last
          * element of the first list. You can not use any "magic number".
          * (Suggestion: use a temporary variable)
          */
-        final int last = li.size() - 1;
-        final int temp = li.get(li.size() - li.size());
-        li.set(li.size() - li.size(), li.get(last));
-        li.set(last, temp);
+        final int last = arrLst.size() - 1;
+        final int temp = arrLst.get(arrLst.size() - arrLst.size());
+        arrLst.set(arrLst.size() - arrLst.size(), arrLst.get(last));
+        arrLst.set(last, temp);
         /*
          * 4) Using a single for-each, print the contents of the arraylist.
          */
-        for (Integer i : li2) {
+        for (Integer i : arrLst) {
             System.err.println(i);
         }
         /*
@@ -84,16 +83,21 @@ public final class UseListsAndMaps {
          * using the previous lists. In order to measure times, use as example
          * TestPerformance.java.
          */
-        calcInserctionTime(li);
-        calcInserctionTime(li2);
+        long time;
+        time = timeHeadInserction(arrLst, ELEMS);
+        System.out.println("Tempo inserimento ArrayList: " + formatTime(time));
+        time = timeHeadInserction(lnkLst, ELEMS);
+        System.out.println("Tempo inserimento LinkedList: " + formatTime(time));
         /*
          * 6) Measure the performance of reading 1000 times an element whose
          * position is in the middle of the collection for both ArrayList and
          * LinkedList, using the collections of point 5. In order to measure
          * times, use as example TestPerformance.java.
          */
-        calcReadingTime(li, 5);
-        calcReadingTime(li2, 5);
+        time = timeReadingByMiddle(arrLst, ELEMS_TO_READ);
+        System.out.println("Tempo lettura ArrayList: " + formatTime(time));
+        time = timeReadingByMiddle(lnkLst, ELEMS_TO_READ);
+        System.out.println("Tempo lettura LinkedList: " + formatTime(time));
         /*
          * 7) Build a new Map that associates to each continent's name its
          * population:
@@ -121,6 +125,10 @@ public final class UseListsAndMaps {
         /*
          * 8) Compute the population of the world
          */
-        System.out.println(continesAndNAmes);
+        long sum = 0;
+        for(var elem : continesAndNAmes.values()) {
+            sum += elem;
+        }
+        System.out.println("Popolazione Totale: " + sum);
     }
 }
